@@ -1,0 +1,39 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using NFLTeams.Models;
+using System.Reflection.Metadata.Ecma335;
+
+namespace NFLTeams.Controllers
+{
+    public class NameController : Controller
+    {
+        [HttpGet]
+        public ViewResult Index()
+        {
+            // get favorite teams and current conference and division
+            // from session, pass to view in view model
+            var session = new NFLSession(HttpContext.Session);
+            var model = new TeamsViewModel
+            {
+                ActiveConf = session.GetActiveConf(),
+                ActiveDiv = session.GetActiveDiv(),
+                Teams = session.GetMyTeams(),
+                Username = session.GetName()
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        public RedirectToActionResult Change(TeamsViewModel model)
+        {
+            var session = new NFLSession(HttpContext.Session);
+            session.SetName(model.Username);
+
+            return RedirectToAction("Index", "Home",
+                new
+                {
+                    ActiveCOnf = session.GetActiveConf(),
+                    ActiveDiv = session.GetActiveDiv(),
+                });
+        }
+    }
+}
